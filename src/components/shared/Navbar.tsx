@@ -61,7 +61,8 @@ export function Navbar() {
     const fetchCategories = async () => {
       try {
         const data = await getCategoryTree();
-        setCategories(data.data || []);
+        console.log(data)
+        setCategories(data?.data || []);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
       } finally {
@@ -70,50 +71,50 @@ export function Navbar() {
     };
     fetchCategories();
   }, []);
-
+  
   // Fetch cart count
-  useEffect(() => {
-    const fetchCartCount = async () => {
-      if (!session?.user) {
-        setCartCount(0);
-        return;
-      }
-      try {
-        const cart = await getCart();
-        const count =
-          cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
-        setCartCount(count);
-      } catch (error) {
-        console.error("Failed to fetch cart count:", error);
-      }
-    };
-    fetchCartCount();
+  // useEffect(() => {
+  //   const fetchCartCount = async () => {
+  //     if (!session?.user) {
+  //       setCartCount(0);
+  //       return;
+  //     }
+  //     try {
+  //       const cart = await getCart();
+  //       const count =
+  //         cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
+  //       setCartCount(count);
+  //     } catch (error) {
+  //       console.error("Failed to fetch cart count:", error);
+  //     }
+  //   };
+  //   fetchCartCount();
 
-    const handleCartUpdate = () => fetchCartCount();
-    window.addEventListener("cartUpdated", handleCartUpdate);
-    return () => window.removeEventListener("cartUpdated", handleCartUpdate);
-  }, [session]);
+  //   const handleCartUpdate = () => fetchCartCount();
+  //   window.addEventListener("cartUpdated", handleCartUpdate);
+  //   return () => window.removeEventListener("cartUpdated", handleCartUpdate);
+  // }, [session]);
 
-  // Fetch wishlist count
-  useEffect(() => {
-    const fetchWishlistCount = async () => {
-      if (!session?.user) {
-        setWishlistCount(0);
-        return;
-      }
-      try {
-        const { getMyWishlist } = await import("@/service/wishlist.service");
-        const result = await getMyWishlist();
-        setWishlistCount(result.data?.length || 0);
-      } catch {
-        /* silent fail */
-      }
-    };
-    fetchWishlistCount();
-    window.addEventListener("wishlistUpdated", fetchWishlistCount);
-    return () =>
-      window.removeEventListener("wishlistUpdated", fetchWishlistCount);
-  }, [session]);
+  // // Fetch wishlist count
+  // useEffect(() => {
+  //   const fetchWishlistCount = async () => {
+  //     if (!session?.user) {
+  //       setWishlistCount(0);
+  //       return;
+  //     }
+  //     try {
+  //       const { getMyWishlist } = await import("@/service/wishlist.service");
+  //       const result = await getMyWishlist();
+  //       setWishlistCount(result.data?.length || 0);
+  //     } catch {
+  //       /* silent fail */
+  //     }
+  //   };
+  //   fetchWishlistCount();
+  //   window.addEventListener("wishlistUpdated", fetchWishlistCount);
+  //   return () =>
+  //     window.removeEventListener("wishlistUpdated", fetchWishlistCount);
+  // }, [session]);
 
   const initials = useMemo(() => {
     const name = session?.user?.name ?? session?.user?.email ?? "User";

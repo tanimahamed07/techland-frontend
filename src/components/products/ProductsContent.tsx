@@ -54,6 +54,7 @@ export default function ProductsContent({
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", "1");
 
+
     Object.entries(updates).forEach(([key, value]) => {
       if (value === null || value === undefined) params.delete(key);
       else params.set(key, value);
