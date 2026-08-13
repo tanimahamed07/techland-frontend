@@ -31,7 +31,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ThemeToggle } from "../theme-toggle";
 import { getCategoryTree } from "@/service/category.service";
 import { CategoryTree } from "@/types/category.types";
-import { getCart } from "@/service/cart.service";
 import CartSidebar from "../CartSidebar";
 import {
   Sheet,
@@ -45,17 +44,24 @@ import {
   CollapsibleContent,
 } from "@/components/ui/collapsible";
 
-// Static top-level navigation links (kept separate from dynamic categories)
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
 ];
 
-export function Navbar() {
+interface NavbarProps {
+  initialCategories?: CategoryTree[];
+}
+
+export function Navbar({ initialCategories = [] }: NavbarProps) {
   const router = useRouter();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [categories, setCategories] = useState<CategoryTree[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  // Props থেকে সরাসরি ক্যাটাগরি সেট করা হচ্ছে
+  const [categories, setCategories] =
+    useState<CategoryTree[]>(initialCategories);
+  const [loading, setLoading] = useState(initialCategories.length === 0);
+
   const [cartOpen, setCartOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
@@ -64,12 +70,13 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const { data: session, status } = useSession();
 
-  // Fetch categories
+  // যদি কোনো কারণে সার্ভার থেকে initialCategories না আসে, তবেই ক্লায়েন্ট ফেচ করবে
   useEffect(() => {
+    if (initialCategories.length > 0) return;
+
     const fetchCategories = async () => {
       try {
         const data = await getCategoryTree();
-        console.log(data);
         setCategories(data?.data || []);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
@@ -78,51 +85,7 @@ export function Navbar() {
       }
     };
     fetchCategories();
-  }, []);
-
-  // Fetch cart count
-  // useEffect(() => {
-  //   const fetchCartCount = async () => {
-  //     if (!session?.user) {
-  //       setCartCount(0);
-  //       return;
-  //     }
-  //     try {
-  //       const cart = await getCart();
-  //       const count =
-  //         cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
-  //       setCartCount(count);
-  //     } catch (error) {
-  //       console.error("Failed to fetch cart count:", error);
-  //     }
-  //   };
-  //   fetchCartCount();
-
-  //   const handleCartUpdate = () => fetchCartCount();
-  //   window.addEventListener("cartUpdated", handleCartUpdate);
-  //   return () => window.removeEventListener("cartUpdated", handleCartUpdate);
-  // }, [session]);
-
-  // // Fetch wishlist count
-  // useEffect(() => {
-  //   const fetchWishlistCount = async () => {
-  //     if (!session?.user) {
-  //       setWishlistCount(0);
-  //       return;
-  //     }
-  //     try {
-  //       const { getMyWishlist } = await import("@/service/wishlist.service");
-  //       const result = await getMyWishlist();
-  //       setWishlistCount(result.data?.length || 0);
-  //     } catch {
-  //       /* silent fail */
-  //     }
-  //   };
-  //   fetchWishlistCount();
-  //   window.addEventListener("wishlistUpdated", fetchWishlistCount);
-  //   return () =>
-  //     window.removeEventListener("wishlistUpdated", fetchWishlistCount);
-  // }, [session]);
+  }, [initialCategories]);
 
   const initials = useMemo(() => {
     const name = session?.user?.name ?? session?.user?.email ?? "User";
@@ -163,7 +126,7 @@ export function Navbar() {
             <span className="text-xl font-bold text-foreground">TechLand</span>
           </Link>
 
-          {/* Desktop Primary Nav Links (Home / About) */}
+          {/* Desktop Primary Nav Links */}
           <nav className="hidden items-center gap-6 lg:flex shrink-0">
             {NAV_LINKS.map((link) => (
               <Link
@@ -256,8 +219,6 @@ export function Navbar() {
                     <Link href="/dashboard/my-reviews">My Reviews</Link>
                   </DropdownMenuItem>
 
-                  {/* Role based Admin Panel link */}
-
                   {(session.user.role === "admin" ||
                     session.user.role === "super-admin") && (
                     <DropdownMenuItem
@@ -293,7 +254,7 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Mobile-only Icons & Hamburger (Extreme Right) */}
+          {/* Mobile-only Icons & Hamburger */}
           <div className="flex items-center gap-1 md:hidden">
             <ThemeToggle />
             <Button
@@ -325,7 +286,6 @@ export function Navbar() {
               )}
             </Button>
 
-            {/* Hamburger Menu - Fixed position at the end */}
             <Button
               variant="ghost"
               size="icon"
@@ -415,7 +375,7 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Drawer (Left side) */}
+      {/* Mobile Drawer */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="left"
@@ -443,9 +403,7 @@ export function Navbar() {
             </div>
           </div>
 
-          {/* Main Content Area - Category Section */}
           <div className="flex-1 overflow-y-auto">
-            {/* Primary Nav Links (Home / About) */}
             <nav className="px-2 pt-4 space-y-1">
               <Link
                 href="/"
@@ -507,7 +465,6 @@ export function Navbar() {
             </nav>
           </div>
 
-          {/* Account Settings Section - Pushed to Bottom */}
           <div className="mt-auto border-t bg-muted/10">
             {session?.user ? (
               <nav className="px-2 py-4 space-y-1">
@@ -553,7 +510,6 @@ export function Navbar() {
                 </div>
               </nav>
             ) : (
-              /* Non-Logged In Footer */
               <div className="p-4">
                 <div className="grid grid-cols-2 gap-2">
                   <Button size="sm" variant="outline" asChild>

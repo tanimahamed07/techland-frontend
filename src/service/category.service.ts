@@ -15,11 +15,14 @@ const getAuthToken = async (): Promise<string> => {
   return session.accessToken as string;
 };
 
-// Get category tree
 export const getCategoryTree = async (): Promise<CategoryTreeResponse> => {
   const response = await fetch(`${BASE_URL}/tree`, {
-    cache: "no-store",
+    cache: "force-cache", // Permanent caching (revalidate time ছাড়া)
+    next: {
+      tags: ["category-tree"], // অনলি ম্যানুয়াল tag-based revalidation-এর জন্য
+    },
   });
+
   if (!response.ok) throw new Error("Failed to fetch category tree");
   return await response.json();
 };
