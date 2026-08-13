@@ -13,6 +13,8 @@ import {
   LogOut,
   Package,
   Shield,
+  Home,
+  Info,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 
@@ -43,6 +45,12 @@ import {
   CollapsibleContent,
 } from "@/components/ui/collapsible";
 
+// Static top-level navigation links (kept separate from dynamic categories)
+const NAV_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+];
+
 export function Navbar() {
   const router = useRouter();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -61,7 +69,7 @@ export function Navbar() {
     const fetchCategories = async () => {
       try {
         const data = await getCategoryTree();
-        console.log(data)
+        console.log(data);
         setCategories(data?.data || []);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
@@ -71,7 +79,7 @@ export function Navbar() {
     };
     fetchCategories();
   }, []);
-  
+
   // Fetch cart count
   // useEffect(() => {
   //   const fetchCartCount = async () => {
@@ -154,6 +162,19 @@ export function Navbar() {
             </div>
             <span className="text-xl font-bold text-foreground">TechLand</span>
           </Link>
+
+          {/* Desktop Primary Nav Links (Home / About) */}
+          <nav className="hidden items-center gap-6 lg:flex shrink-0">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
 
           {/* Desktop Search */}
           <div className="hidden flex-1 md:flex md:max-w-xl">
@@ -424,7 +445,27 @@ export function Navbar() {
 
           {/* Main Content Area - Category Section */}
           <div className="flex-1 overflow-y-auto">
-            <nav className="px-2 py-4 space-y-1">
+            {/* Primary Nav Links (Home / About) */}
+            <nav className="px-2 pt-4 space-y-1">
+              <Link
+                href="/"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md hover:bg-muted transition-colors"
+              >
+                <Home className="h-4 w-4" /> Home
+              </Link>
+              <Link
+                href="/about"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md hover:bg-muted transition-colors"
+              >
+                <Info className="h-4 w-4" /> About
+              </Link>
+            </nav>
+
+            <div className="mx-4 my-3 border-t border-border" />
+
+            <nav className="px-2 pb-4 space-y-1">
               <p className="px-3 text-[11px] font-bold uppercase text-muted-foreground mb-2">
                 Shop Categories
               </p>

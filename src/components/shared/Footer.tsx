@@ -141,6 +141,14 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  href="/about"
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/products?category=laptops"
                   className="text-sm text-muted-foreground hover:text-primary"
                 >
